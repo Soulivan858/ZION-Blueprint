@@ -1,32 +1,55 @@
 #!/bin/bash
 
-# ZION Wallet CLI Prototype
 WALLET_FILE="$HOME/.zion_wallet_data"
 LOG_FILE="$HOME/.zion_wallet_log"
+PIN_FILE="$HOME/.zion_wallet_pin"
 
 # Initialize Wallet if not exists
 if [ ! -f "$WALLET_FILE" ]; then
     echo "BALANCE=1000" > "$WALLET_FILE"
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Wallet initialized with 1000 ZION Coins" > "$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Wallet initialized" > "$LOG_FILE"
 fi
+
+# Function to verify PIN
+verify_pin() {
+    if [ ! -f "$PIN_FILE" ]; then
+        echo -e "\n🔒 ตั้งค่า PIN สำหรับกระเป๋าเงิน (6 หลัก):"
+        read -s -p "ตั้งรหัส PIN: " new_pin
+        echo "$new_pin" > "$PIN_FILE"
+        echo -e "\n✅ ตั้งค่า PIN สำเร็จ!"
+        return 0
+    fi
+
+    echo -e "\n🔐 โปรดระบุรหัส PIN เพื่อดำเนินการ:"
+    read -s -p "ใส่รหัส PIN: " input_pin
+    stored_pin=$(cat "$PIN_FILE")
+    
+    if [ "$input_pin" == "$stored_pin" ]; then
+        echo -e "\n✅ ยืนยันตัวตนสำเร็จ!"
+        return 0
+    else
+        echo -e "\n❌ รหัส PIN ไม่ถูกต้อง! ยกเลิกรายการ"
+        return 1
+    fi
+}
 
 source "$WALLET_FILE"
 
 show_menu() {
-    echo "================================="
+    echo -e "\n================================="
     echo "       💎 ZION WALLET CLI 💎     "
     echo "================================="
-    echo "1. เช็กยอดเงินคงเหลือ (Check Balance)"
-    echo "2. โอนเงิน (Transfer Coins)"
-    echo "3. เติมเงิน (Top-up Coins)"
-    echo "4. ดูประวัติธุรกรรม (Transaction History)"
-    echo "5. ออกจากโปรแกรม (Exit)"
+    echo "1. เช็กยอดเงินคงเหลือ"
+    echo "2. โอนเงิน (ต้องการ PIN)"
+    echo "3. เติมเงิน (ต้องการ PIN)"
+    echo "4. ดูประวัติธุรกรรม"
+    echo "5. ออกจากโปรแกรม"
     echo "================================="
     read -p "เลือกเมนู [1-5]: " choice
     case $choice in
         1) check_balance ;;
-        2) transfer_coins ;;
-        3) topup_coins ;;
+        2) if verify_pin; then transfer_coins; else show_menu; fi ;;
+        3) if verify_pin; then topup_coins; else show_menu; fi ;;
         4) view_history ;;
         5) exit 0 ;;
         *) echo "❌ ตัวเลือกไม่ถูกต้อง!"; sleep 1; show_menu ;;
@@ -35,7 +58,6 @@ show_menu() {
 
 check_balance() {
     echo -e "\n💰 ยอดเงินคงเหลือของคุณ: $BALANCE ZION Coins"
-    echo "================================="
     read -p "กด Enter เพื่อกลับเมนูหลัก..."
     show_menu
 }
@@ -43,7 +65,7 @@ check_balance() {
 transfer_coins() {
     echo -e "\n💸 -- โอนเงิน --"
     read -p "ระบุ Username ผู้รับ: " recipient
-    read -p "ระบุจำนวน Coin ที่ต้องการโอน: " amount
+    read -p "ระบุจำนวน Coin: " amount
     
     if [[ "$amount" =~ ^[0-9]+$ ]] && [ "$amount" -gt 0 ] && [ "$amount" -le "$BALANCE" ]; then
         BALANCE=$((BALANCE - amount))
@@ -60,7 +82,6 @@ transfer_coins() {
 topup_coins() {
     echo -e "\n📥 -- เติมเงิน --"
     read -p "ระบุจำนวน Coin ที่ต้องการเติม: " amount
-    
     if [[ "$amount" =~ ^[0-9]+$ ]] && [ "$amount" -gt 0 ]; then
         BALANCE=$((BALANCE + amount))
         echo "BALANCE=$BALANCE" > "$WALLET_FILE"
@@ -75,18 +96,10 @@ topup_coins() {
 
 view_history() {
     echo -e "\n📜 -- ประวัติธุรกรรม --"
-    if [ -f "$LOG_FILE" ]; then
-        cat "$LOG_FILE"
-    else
-        echo "ยังไม่มีประวัติการทำรายการ"
-    fi
-    echo "================================="
+    cat "$LOG_FILE"
     read -p "กด Enter เพื่อกลับเมนูหลัก..."
     show_menu
 }
 
-# ให้สิทธิ์การรันไฟล์
 chmod +x scripts/check_wallet.sh
-
-# เรียกใช้งานเมนู
 show_menu
