@@ -5,74 +5,113 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZION App</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; margin: 0; padding: 0; display: flex; justify-content: center; height: 100vh; }
-    .app-container { width: 100%; max-width: 450px; background: #0f172a; display: flex; flex-direction: column; height: 100%; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-    
-    header { background: #1e293b; padding: 15px; text-align: center; border-bottom: 1px solid #334155; }
-    .content { flex: 1; padding: 20px; overflow-y: auto; }
-    
-    .nav-bar { background: #1e293b; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #334155; }
+    body { font-family: sans-serif; background: #0f172a; color: white; margin: 0; display: flex; justify-content: center; height: 100vh; }
+    .app { width: 100%; max-width: 450px; background: #0f172a; display: flex; flex-direction: column; height: 100%; }
+    header { background: #1e293b; padding: 15px; text-align: center; font-weight: bold; color: #38bdf8; border-bottom: 1px solid #334155; }
+    .content { flex: 1; padding: 15px; overflow-y: auto; }
+    .nav { background: #1e293b; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #334155; }
     .nav-item { color: #94a3b8; cursor: pointer; text-align: center; font-size: 0.8em; }
-    .nav-item.active { color: #38bdf8; }
-
-    .card { background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #334155; margin-bottom: 20px; }
+    .nav-item.active { color: #38bdf8; font-weight: bold; }
+    .card { background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 15px; }
+    .player { background: #000; height: 140px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.8em; margin: 10px 0; }
+    .row { display: flex; justify-content: space-between; margin-top: 8px; }
+    .btn { background: #334155; color: white; border: none; padding: 6px 12px; border-radius: 15px; font-size: 0.8em; cursor: pointer; }
+    .btn.liked { background: #e11d48; }
+    .comments { margin-top: 10px; background: #0f172a; padding: 8px; border-radius: 6px; font-size: 0.8em; }
+    .inp-group { display: flex; gap: 5px; margin-top: 6px; }
+    .inp-group input { flex: 1; background: #1e293b; border: 1px solid #334155; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; }
+    .inp-group button { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; }
     .balance { font-size: 2em; color: #4ade80; font-weight: bold; margin: 10px 0; }
-    button { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: bold; margin-top: 10px; }
-    
+    button.primary { background: #2563eb; color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
     .view { display: none; }
     .view.active { display: block; }
   </style>
 </head>
 <body>
 
-<div class="app-container">
-  <header><b>ZION</b></header>
+<div class="app">
+  <header>💎 ZION ECOSYSTEM</header>
   
   <div class="content">
     <!-- Home View -->
     <div id="home" class="view active">
-      <h2>📽️ Feed</h2>
-      <div class="card">ZION Teaser... <br> ❤️ 120 Likes</div>
-      <div class="card">Wallet Guide... <br> ❤️ 85 Likes</div>
+      <h3 style="margin-top:0;">📽️ Short Video Feed</h3>
+      <div class="card">
+        <div style="font-weight:bold; color:#38bdf8;">@soulivan</div>
+        <div style="font-size:0.85em; color:#cbd5e1;">ZION Teaser Preview! 🔥</div>
+        <div class="player" id="p1">▶️</div>
+        <div class="row">
+          <button class="btn" onclick="toggleLike(this, 'c1')">❤️ <span id="c1">120</span> ไลก์</button>
+          <button class="btn" onclick="togglePlay('p1')">🎬 เล่น/พัก</button>
+        </div>
+        <div class="comments">
+          <div id="cmt1"><b>@alex:</b> โปรเจกต์สวยมากครับ!</div>
+          <div class="inp-group">
+            <input type="text" id="in1" placeholder="พิมพ์คอมเมนต์...">
+            <button onclick="addCmt('in1', 'cmt1')">ส่ง</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Live View -->
     <div id="live" class="view">
-      <h2>🔴 Live Stream</h2>
+      <h3 style="margin-top:0;">🔴 Live Stream</h3>
       <div class="card">
-        <p>Soulivan Live 👁️ 1,240</p>
-        <button onclick="sendGift()" style="background:#e11d48">🎁 ส่งของขวัญ (50 Coins)</button>
+        <p><b>Soulivan Live</b> 👁️ 1,240 Viewers</p>
+        <button class="primary" style="background:#e11d48" onclick="sendGift()">🎁 ส่งของขวัญ (50 Coins)</button>
       </div>
     </div>
 
     <!-- Wallet View -->
     <div id="wallet" class="view">
-      <h2>💎 Wallet</h2>
+      <h3 style="margin-top:0;">💎 Wallet</h3>
       <div class="card">
-        <p>ยอดเงินคงเหลือ:</p>
-        <div class="balance"><span id="coinBalance">950</span></div>
-        <button onclick="topUp()">+ เติมเงิน</button>
+        <p style="margin:0;">ยอดเงินคงเหลือ:</p>
+        <div class="balance"><span id="bal">950</span> <span style="font-size:0.4em;">Coins</span></div>
+        <button class="primary" onclick="topUp()">+ เติมเงิน 100 Coins</button>
       </div>
     </div>
   </div>
 
-  <div class="nav-bar">
-    <div class="nav-item active" onclick="showView('home', this)">🏠<br>Home</div>
-    <div class="nav-item" onclick="showView('live', this)">🔴<br>Live</div>
-    <div class="nav-item" onclick="showView('wallet', this)">💎<br>Wallet</div>
+  <div class="nav">
+    <div class="nav-item active" onclick="showV('home', this)">🏠<br>Home</div>
+    <div class="nav-item" onclick="showV('live', this)">🔴<br>Live</div>
+    <div class="nav-item" onclick="showV('wallet', this)">💎<br>Wallet</div>
   </div>
 </div>
 
 <script>
   let balance = 950;
-  function showView(id, el) {
+  function showV(id, el) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     el.classList.add('active');
   }
-  function topUp() { balance += 100; document.getElementById('coinBalance').innerText = balance; }
-  function sendGift() { if(balance >= 50) { balance -= 50; document.getElementById('coinBalance').innerText = balance; alert("ส่งสำเร็จ!"); } else { alert("เงินไม่พอ"); } }
+  function toggleLike(btn, cId) {
+    let el = document.getElementById(cId);
+    let n = parseInt(el.innerText);
+    if(btn.classList.toggle('liked')) { el.innerText = n + 1; } else { el.innerText = n - 1; }
+  }
+  function togglePlay(pId) {
+    let p = document.getElementById(pId);
+    p.innerText = p.innerText === '▶️' ? '🎥 [Playing]' : '▶️';
+    p.style.background = p.innerText === '▶️' ? '#000' : '#0284c7';
+  }
+  function addCmt(inId, cmtId) {
+    let input = document.getElementById(inId);
+    let box = document.getElementById(cmtId);
+    if(input.value.trim()){
+      box.innerHTML += `<div><b>@you:</b> ${input.value}</div>`;
+      input.value = '';
+    }
+  }
+  function topUp() { balance += 100; document.getElementById('bal').innerText = balance; }
+  function sendGift() {
+    if(balance >= 50) { balance -= 50; document.getElementById('bal').innerText = balance; alert("ส่งสำเร็จ!"); }
+    else { alert("เงินไม่พอ"); }
+  }
 </script>
 
 </body>
